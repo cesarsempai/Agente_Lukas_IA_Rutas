@@ -1,0 +1,5 @@
+{
+  "name": "RutaInteligente - Planificador de Rutas con IA",
+  "description": "Un prototipo web con mapa interactivo y chatbot para generar y comparar rutas de transporte basadas en el tipo de servicio y restricciones operativas.",
+  "requestFramePermissions": []
+}
