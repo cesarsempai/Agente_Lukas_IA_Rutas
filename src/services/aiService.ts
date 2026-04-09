@@ -1,41 +1,49 @@
 import { GoogleGenAI } from "@google/genai";
 import { ChatMessage, UserPreferences, RouteData } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.warn("GEMINI_API_KEY is missing. AI features will not work.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey: apiKey || "dummy-key" });
+  }
+  return aiInstance;
+}
 
 export async function getChatResponse(messages: ChatMessage[]) {
+  const ai = getAI();
   const systemInstruction = `
-    Eres un asistente experto en logística de transporte llamado "RutaIA".
-    Tu objetivo es ayudar al usuario a planificar una ruta de transporte recolectando los siguientes datos:
-    1. Punto de partida (Origen)
-    2. Punto de destino (Destino)
-    3. Hora de llegada requerida
-    4. Tipo de servicio (corporativo, escolar, industrial o turístico)
-    5. Zonas a evitar (opcional)
-
-    REQUISITO ADICIONAL:
-    - Una vez que tengas los datos y vayas a dar la respuesta final, DEBES incluir información sobre el CLIMA actual en la zona y si hay REPORTES DE ACCIDENTES o incidentes viales en las posibles rutas. Inventa datos realistas basados en la ubicación si no tienes acceso a datos en tiempo real.
-
+    Eres "Lukas IA", un asistente de logística directo y eficiente.
+    
+    OBJETIVO:
+    Ayudar al usuario a generar rutas de transporte.
+    
+    REGLAS:
+    1. NO preguntes por el clima ni por accidentes.
+    2. NO menciones "en cualquier parte del mundo".
+    3. NO pidas el origen y destino si el usuario ya los marcó en el mapa.
+    4. SÉ BREVE. No des explicaciones largas de los servicios a menos que te lo pidan.
+    5. Solo necesitas saber: Hora de llegada y Tipo de servicio (corporativo, escolar, industrial o turístico).
+    
     IMPORTANTE: 
-    - Si el usuario menciona nombres de lugares, intenta obtener sus coordenadas aproximadas (latitud y longitud).
-    - Si el usuario ya marcó puntos en el mapa, confirma que los ves.
-    - Sé amable y profesional.
-    - Haz preguntas de una en una de forma ordenada.
-    - Cuando tengas todos los datos, DEBES incluir al final de tu respuesta el siguiente bloque de código JSON exacto para que el sistema lo procese (asegúrate de incluir coordenadas lat/lng válidas):
-      \`\`\`json
+    - Cuando tengas la hora y el tipo de servicio, genera el JSON final inmediatamente.
+    - El JSON debe incluir las coordenadas reales de los puntos seleccionados.
       { 
         "complete": true, 
         "preferences": { 
-          "origin": "nombre del lugar", 
-          "destination": "nombre del lugar",
-          "originCoords": [latitud, longitud],
-          "destinationCoords": [latitud, longitud],
-          "arrivalTime": "HH:MM",
+          "origin": "Origen", 
+          "destination": "Destino",
+          "originCoords": [lat, lng],
+          "destinationCoords": [lat, lng],
+          "arrivalTime": "hora",
           "serviceType": "tipo",
           "zonesToAvoid": []
         } 
       }
-      \`\`\`
   `;
 
   const response = await ai.models.generateContent({
@@ -126,22 +134,26 @@ export async function generateRealRoutes(prefs: UserPreferences, originCoords: [
   ];
 
   const weatherOptions = ['Despejado', 'Nublado', 'Lluvia ligera', 'Neblina'];
-  const accidentOptions = [
-    'Colisión menor en km 12',
-    'Obras en la vía (carril derecho cerrado)',
-    'Vehículo varado obstruyendo paso',
-    'Manifestación pacífica en glorieta'
-  ];
+  
+  return routes.slice(0, 3).map((route, index) => {
+    const distanceKm = Number((route.distance / 1000).toFixed(1));
+    const accidentOptions = [
+      `Colisión menor en km ${Math.max(0.1, (Math.random() * distanceKm)).toFixed(1)}`,
+      'Obras en la vía (carril derecho cerrado)',
+      'Vehículo varado obstruyendo paso',
+      'Manifestación pacífica en glorieta'
+    ];
 
-  return routes.slice(0, 3).map((route, index) => ({
-    id: `route-${index + 1}`,
-    name: routeNames[index],
-    distance: Number((route.distance / 1000).toFixed(1)), // meters to km
-    time: Math.round(route.duration / 60), // seconds to minutes
-    trafficLevel: index === 0 ? 'low' : index === 1 ? 'medium' : 'high',
-    riskLevel: index === 0 ? 2 : index === 1 ? 1 : 4,
-    coordinates: route.coordinates,
-    weather: weatherOptions[Math.floor(Math.random() * weatherOptions.length)],
-    accidents: index === 2 ? [accidentOptions[Math.floor(Math.random() * accidentOptions.length)]] : []
-  }));
+    return {
+      id: `route-${index + 1}`,
+      name: routeNames[index],
+      distance: distanceKm, // meters to km
+      time: Math.round(route.duration / 60), // seconds to minutes
+      trafficLevel: index === 0 ? 'low' : index === 1 ? 'medium' : 'high',
+      riskLevel: index === 0 ? 2 : index === 1 ? 1 : 4,
+      coordinates: route.coordinates,
+      weather: weatherOptions[Math.floor(Math.random() * weatherOptions.length)],
+      accidents: index === 2 ? [accidentOptions[Math.floor(Math.random() * accidentOptions.length)]] : []
+    };
+  });
 }

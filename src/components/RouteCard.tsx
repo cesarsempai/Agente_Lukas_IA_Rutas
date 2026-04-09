@@ -30,12 +30,12 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, isSelected, isBest, onSele
       className={cn(
         "relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200",
         isSelected 
-          ? "border-blue-500 bg-blue-50/30 shadow-md" 
+          ? "border-primary bg-bg-soft/30 shadow-md" 
           : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm"
       )}
     >
       {isBest && (
-        <div className="absolute -top-3 left-4 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center gap-1 shadow-sm">
+        <div className="absolute -top-3 left-4 px-2 py-0.5 bg-accent text-gray-800 text-[10px] font-bold rounded-full flex items-center gap-1 shadow-sm">
           <Star size={10} fill="currentColor" />
           RECOMENDADA
         </div>
@@ -50,11 +50,11 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, isSelected, isBest, onSele
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="flex items-center gap-2 text-gray-600">
-          <Clock size={16} className="text-blue-500" />
+          <Clock size={16} className="text-secondary" />
           <span className="text-xs font-medium">{formatDuration(route.time)}</span>
         </div>
         <div className="flex items-center gap-2 text-gray-600">
-          <MapPin size={16} className="text-blue-500" />
+          <MapPin size={16} className="text-secondary" />
           <span className="text-xs font-medium">{formatDistance(route.distance)}</span>
         </div>
       </div>
@@ -63,12 +63,12 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, isSelected, isBest, onSele
       <div className="flex flex-wrap gap-3 mb-4">
         {route.weather && (
           <div className="flex items-center gap-1.5 text-gray-500">
-            <Cloud size={14} className="text-sky-400" />
+            <Cloud size={14} className="text-secondary" />
             <span className="text-[11px]">{route.weather}</span>
           </div>
         )}
         {route.accidents && route.accidents.length > 0 && (
-          <div className="flex items-center gap-1.5 text-red-500 font-medium">
+          <div className="flex items-center gap-1.5 text-primary font-medium">
             <AlertCircle size={14} />
             <span className="text-[11px]">{route.accidents[0]}</span>
           </div>
@@ -76,19 +76,19 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, isSelected, isBest, onSele
       </div>
 
       {route.recommendation && (
-        <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-100">
+        <div className="mb-3 p-2 bg-bg-soft rounded-lg border border-bg-soft">
           <div className="flex items-start gap-2">
-            <CheckCircle2 size={14} className="text-blue-600 mt-0.5 shrink-0" />
-            <p className="text-[11px] text-blue-800 leading-tight">{route.recommendation}</p>
+            <CheckCircle2 size={14} className="text-primary mt-0.5 shrink-0" />
+            <p className="text-[11px] text-primary leading-tight">{route.recommendation}</p>
           </div>
         </div>
       )}
 
       {route.specificRisk && (
         <div className="flex items-start gap-2">
-          <AlertTriangle size={14} className="text-amber-500 mt-0.5 shrink-0" />
+          <AlertTriangle size={14} className="text-accent mt-0.5 shrink-0" />
           <p className="text-[11px] text-gray-500 leading-tight">
-            <span className="font-bold text-amber-600">Riesgo:</span> {route.specificRisk}
+            <span className="font-bold text-primary">Riesgo:</span> {route.specificRisk}
           </p>
         </div>
       )}
@@ -99,7 +99,7 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, isSelected, isBest, onSele
             <div 
               className={cn(
                 "h-full rounded-full",
-                route.score && route.score > 80 ? "bg-green-500" : route.score && route.score > 50 ? "bg-yellow-500" : "bg-red-500"
+                route.score && route.score > 80 ? "bg-secondary" : route.score && route.score > 50 ? "bg-accent" : "bg-primary"
               )}
               style={{ width: `${route.score || 0}%` }}
             />
@@ -108,7 +108,7 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, isSelected, isBest, onSele
         </div>
         <button className={cn(
           "text-[10px] font-bold px-3 py-1 rounded-lg transition-colors",
-          isSelected ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          isSelected ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
         )}>
           {isSelected ? 'Seleccionada' : 'Seleccionar'}
         </button>
