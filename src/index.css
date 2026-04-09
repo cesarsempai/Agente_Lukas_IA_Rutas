@@ -3,5 +3,11 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-primary: #F9677D;
+  --color-secondary: #8BD7D1;
+  --color-accent: #FFF87F;
+  --color-bg-main: #EAF2E3;
+  --color-bg-soft: #F4F1BB;
 }
 
